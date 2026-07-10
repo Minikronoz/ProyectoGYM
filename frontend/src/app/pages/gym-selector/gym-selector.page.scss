@@ -1,0 +1,53 @@
+.greeting-section {
+  margin-bottom: 24px;
+}
+
+.greeting-section h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.greeting-section p {
+  color: #757575;
+  font-size: 16px;
+}
+
+.gym-list {
+  background: transparent;
+  margin-bottom: 24px;
+}
+
+.gym-item {
+  background: white;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+}
+
+.gym-item.selected {
+  --background: #e3f2fd;
+  border: 2px solid var(--ion-color-primary);
+}
+
+.gym-item h3 {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.gym-item p {
+  color: #757575;
+  font-size: 14px;
+}
+
+.action-buttons {
+  margin-top: auto;
+  padding-bottom: 24px;
+}
+
+.quick-action-btn {
+  --border-radius: 12px;
+  margin-bottom: 12px;
+}

@@ -1,0 +1,78 @@
+.date-section {
+  margin-bottom: 16px;
+}
+
+.date-item {
+  background: white;
+  border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.notes-section {
+  margin-bottom: 24px;
+}
+
+.notes-item {
+  background: white;
+  border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.equipment-section,
+.recent-section {
+  margin-bottom: 24px;
+}
+
+.equipment-section h3,
+.recent-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.section-hint {
+  font-size: 14px;
+  color: #757575;
+  margin-bottom: 12px;
+}
+
+.equipment-list,
+.recent-list {
+  background: transparent;
+}
+
+.equipment-item,
+.recent-item {
+  background: white;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.equipment-item.selected {
+  --background: #e3f2fd;
+}
+
+.equipment-item h3,
+.recent-item h3 {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.equipment-item p,
+.recent-item p {
+  color: #757575;
+  font-size: 13px;
+}
+
+.action-section {
+  padding-bottom: 24px;
+  margin-top: auto;
+}
+
+.quick-action-btn {
+  --border-radius: 12px;
+}

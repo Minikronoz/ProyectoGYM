@@ -1,0 +1,36 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>FlexLog</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" color="light">
+  <div class="login-container">
+    <div class="logo-section">
+      <h1 class="app-title">FlexLog</h1>
+      <p class="app-subtitle">Tu diario de entrenamientos</p>
+    </div>
+
+    <div class="features-section">
+      <div class="feature-item">
+        <ion-icon name="barbell-outline" color="primary"></ion-icon>
+        <span>Registrá máquinas locales con sus alias</span>
+      </div>
+      <div class="feature-item">
+        <ion-icon name="flash-outline" color="primary"></ion-icon>
+        <span>Pre-carga del último peso usado</span>
+      </div>
+      <div class="feature-item">
+        <ion-icon name="cloud-offline-outline" color="primary"></ion-icon>
+        <span>Funciona offline, sincroniza después</span>
+      </div>
+    </div>
+
+    <div class="login-section">
+      <ion-button expand="block" size="large" (click)="loginWithGoogle()" class="quick-action-btn">
+        <ion-icon slot="start" name="logo-google"></ion-icon>
+        Iniciar sesión con Google
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

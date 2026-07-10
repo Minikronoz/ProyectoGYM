@@ -1,0 +1,40 @@
+{
+  "name": "flexlog-app",
+  "version": "1.0.0",
+  "description": "App de tracking de entrenamientos",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "lint": "ng lint",
+    "ionic:serve": "ionic serve",
+    "ionic:build": "ionic build"
+  },
+  "dependencies": {
+    "@angular/common": "^17.0.0",
+    "@angular/compiler": "^17.0.0",
+    "@angular/core": "^17.0.0",
+    "@angular/forms": "^17.0.0",
+    "@angular/platform-browser": "^17.0.0",
+    "@angular/platform-browser-dynamic": "^17.0.0",
+    "@angular/router": "^17.0.0",
+    "@ionic/angular": "^7.0.0",
+    "@ionic/storage-angular": "^4.0.0",
+    "@types/uuid": "^10.0.0",
+    "ionicons": "^7.0.0",
+    "rxjs": "^7.8.0",
+    "tslib": "^2.6.0",
+    "uuid": "^9.0.1",
+    "zone.js": "^0.14.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^17.0.0",
+    "@angular/cli": "^17.0.0",
+    "@angular/compiler-cli": "^17.0.0",
+    "@angular/language-server": "^17.0.0",
+    "@types/node": "^18.0.0",
+    "typescript": "~5.2.0"
+  }
+}

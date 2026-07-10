@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>FlexLog</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" color="light">
+  <div class="greeting-section">
+    <h2>Hola, {{ userName }}</h2>
+    <p>Seleccioná tu gym para empezar</p>
+  </div>
+
+  <ion-loading [isOpen]="isLoading" message="Cargando..."></ion-loading>
+
+  <ion-list lines="none" class="gym-list">
+    <ion-item
+      *ngFor="let gym of gyms"
+      [class.selected]="gym.id === selectedGymId"
+      (click)="selectGym(gym.id)"
+      class="gym-item"
+      detail>
+      <ion-icon name="business-outline" slot="start" color="primary"></ion-icon>
+      <ion-label>
+        <h3>{{ gym.name }}</h3>
+        <p>{{ gym.branch }}</p>
+      </ion-label>
+      <ion-icon
+        *ngIf="gym.id === selectedGymId"
+        name="checkmark-circle"
+        slot="end"
+        color="primary">
+      </ion-icon>
+    </ion-item>
+  </ion-list>
+
+  <div class="action-buttons">
+    <ion-button
+      expand="block"
+      size="large"
+      [disabled]="!selectedGymId"
+      (click)="startWorkout()"
+      class="quick-action-btn">
+      <ion-icon slot="start" name="barbell"></ion-icon>
+      Iniciar Entrenamiento
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      size="large"
+      fill="outline"
+      (click)="viewHistory()"
+      class="quick-action-btn">
+      <ion-icon slot="start" name="calendar-outline"></ion-icon>
+      Ver Historial
+    </ion-button>
+  </div>
+</ion-content>

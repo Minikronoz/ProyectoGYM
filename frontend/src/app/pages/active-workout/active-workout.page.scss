@@ -1,0 +1,157 @@
+.equipment-tabs {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.equipment-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.equipment-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 2px solid transparent;
+  min-width: max-content;
+}
+
+.equipment-tab.active {
+  border-color: var(--ion-color-primary);
+  background: #e3f2fd;
+}
+
+.equipment-tab.has-sets {
+  background: #e8f5e9;
+}
+
+.tab-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.tab-sets {
+  background: var(--ion-color-primary);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.workout-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  margin-bottom: 16px;
+}
+
+.card-header h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.card-header p {
+  color: #757575;
+  font-size: 14px;
+}
+
+.last-set-info {
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.last-set-placeholder {
+  color: #757575;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.sets-list {
+  margin-bottom: 16px;
+}
+
+.set-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.set-item:last-child {
+  border-bottom: none;
+}
+
+.set-item.failure {
+  background: #ffebee;
+  margin: 0 -20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+}
+
+.set-number {
+  font-weight: bold;
+  font-size: 18px;
+  color: var(--ion-color-primary);
+  width: 32px;
+}
+
+.set-details {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.quick-set-buttons {
+  margin-bottom: 16px;
+}
+
+.weight-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.weight-label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.quick-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.quick-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.equipment-counter {
+  font-size: 14px;
+  color: #757575;
+}

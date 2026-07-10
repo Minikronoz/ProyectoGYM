@@ -1,0 +1,92 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Día de Entrenamiento</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" color="light">
+  <ion-loading [isOpen]="isLoading" message="Cargando..."></ion-loading>
+
+  <div class="date-section">
+    <ion-item lines="none" class="date-item">
+      <ion-icon name="calendar-outline" slot="start" color="primary"></ion-icon>
+      <ion-datetime
+        [(ngModel)]="workoutDate"
+        presentation="date"
+        [preferWheel]="true">
+      </ion-datetime>
+    </ion-item>
+  </div>
+
+  <div class="notes-section">
+    <ion-item lines="none" class="notes-item">
+      <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
+      <ion-input
+        [(ngModel)]="workoutNotes"
+        placeholder="Notas del entrenamiento (opcional)"
+        clearInput>
+      </ion-input>
+    </ion-item>
+  </div>
+
+  <div class="equipment-section">
+    <h3>Seleccioná las máquinas</h3>
+    <p class="section-hint">Elegí las máquinas que vas a usar hoy</p>
+
+    <ion-list lines="none" class="equipment-list">
+      <ion-item
+        *ngFor="let eq of equipment"
+        [class.selected]="isSelected(eq.id)"
+        (click)="toggleEquipment(eq.id)"
+        class="equipment-item"
+        detail>
+        <ion-icon name="barbell-outline" slot="start" color="primary"></ion-icon>
+        <ion-label>
+          <h3>{{ eq.custom_alias }}</h3>
+          <p>{{ eq.exercise_name }} · {{ eq.unit_type }}</p>
+        </ion-label>
+        <ion-checkbox
+          [checked]="isSelected(eq.id)"
+          slot="end"
+          color="primary">
+        </ion-checkbox>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <div class="recent-section" *ngIf="recentSessions.length > 0">
+    <h3>Sesiones Anteriores</h3>
+    <p class="section-hint">O continuá desde una sesión anterior</p>
+
+    <ion-list lines="none" class="recent-list">
+      <ion-item
+        *ngFor="let session of recentSessions"
+        (click)="continuePreviousSession(session.id)"
+        class="recent-item"
+        detail>
+        <ion-icon name="time-outline" slot="start" color="medium"></ion-icon>
+        <ion-label>
+          <h3>{{ session.date }}</h3>
+          <p>{{ session.general_notes || 'Sin notas' }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <div class="action-section">
+    <ion-button
+      expand="block"
+      size="large"
+      [disabled]="selectedEquipmentIds.length === 0"
+      (click)="startWorkout()"
+      class="quick-action-btn">
+      <ion-icon slot="start" name="play"></ion-icon>
+      Empezar ({{ selectedEquipmentIds.length }} máquinas)
+    </ion-button>
+  </div>
+</ion-content>

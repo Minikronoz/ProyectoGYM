@@ -1,0 +1,97 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Entrenamiento</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="showFinishConfirm = true" [disabled]="totalSets === 0">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        Terminar
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" color="light">
+  <ion-loading [isOpen]="isSaving" message="Guardando..."></ion-loading>
+
+  <div class="equipment-tabs" *ngIf="equipmentWithSets.length > 1">
+    <div
+      *ngFor="let eq of equipmentWithSets; let i = index"
+      class="equipment-tab"
+      [class.active]="i === currentEquipmentIndex"
+      [class.has-sets]="eq.sets.length > 0"
+      (click)="goToEquipment(i)">
+      <span class="tab-name">{{ eq.equipment.custom_alias }}</span>
+      <span class="tab-sets" *ngIf="eq.sets.length > 0">{{ eq.sets.length }}</span>
+    </div>
+  </div>
+
+  <div class="workout-card" *ngIf="currentEquipment">
+    <div class="card-header">
+      <h2>{{ currentEquipment.equipment.custom_alias }}</h2>
+      <p>{{ currentEquipment.equipment.exercise_name }} · {{ currentEquipment.equipment.unit_type }}</p>
+    </div>
+
+    <div class="last-set-info" *ngIf="currentEquipment.lastSet">
+      <span class="last-set-placeholder">{{ getLastSetDisplay() }}</span>
+    </div>
+
+    <div class="sets-list">
+      <div
+        *ngFor="let set of currentEquipment.sets"
+        class="set-item"
+        [class.failure]="set.is_to_failure">
+        <span class="set-number">{{ set.set_number }}</span>
+        <span class="set-details">{{ getSetDisplay(set) }}</span>
+        <ion-icon *ngIf="set.is_to_failure" name="flame" color="danger"></ion-icon>
+        <ion-icon *ngIf="set.set_notes" name="chatbubble-outline" color="medium"></ion-icon>
+      </div>
+    </div>
+
+    <div class="quick-set-buttons">
+      <div class="weight-row">
+        <span class="weight-label">Peso</span>
+        <div class="quick-buttons">
+          <ion-button
+            size="small"
+            (click)="addSet(currentEquipmentIndex, currentEquipment.lastSet?.weight_value || 0, currentEquipment.lastSet?.reps_count || 8, false)">
+            + Reps
+          </ion-button>
+          <ion-button
+            size="small"
+            color="danger"
+            (click)="addSet(currentEquipmentIndex, currentEquipment.lastSet?.weight_value || 0, currentEquipment.lastSet?.reps_count || 8, true)">
+            Fallar
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-navigation" *ngIf="equipmentWithSets.length > 1">
+      <ion-button fill="outline" (click)="goPrevious()" [disabled]="currentEquipmentIndex === 0">
+        <ion-icon slot="start" name="chevron-back"></ion-icon>
+        Anterior
+      </ion-button>
+      <span class="equipment-counter">{{ currentEquipmentIndex + 1 }} / {{ equipmentWithSets.length }}</span>
+      <ion-button fill="outline" (click)="goNext()" [disabled]="currentEquipmentIndex === equipmentWithSets.length - 1">
+        Siguiente
+        <ion-icon slot="end" name="chevron-forward"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <ion-alert
+    [isOpen]="showFinishConfirm"
+    header="Terminar Entrenamiento"
+    [message]="'Registraste ' + totalSets + ' series. ¿Querés guardar?'"
+    [buttons]="[
+      { text: 'Cancelar', role: 'cancel', handler: cancelFinish },
+      { text: 'Descartar', role: 'destructive', handler: discardAndExit },
+      { text: 'Guardar', handler: finishWorkout }
+    ]">
+  </ion-alert>
+</ion-content>

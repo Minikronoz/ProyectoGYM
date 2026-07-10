@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Historial</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" color="light">
+  <ion-loading [isOpen]="isLoading" message="Cargando historial..."></ion-loading>
+
+  <div class="history-list" *ngIf="!isLoading">
+    <div
+      *ngFor="let session of sessions"
+      class="session-card workout-card"
+      (click)="viewSession(session.id)">
+      <div class="session-header">
+        <ion-icon name="barbell-outline" color="primary"></ion-icon>
+        <div class="session-info">
+          <h3>{{ formatDate(session.date) }}</h3>
+          <p>{{ session.general_notes || 'Sin notas' }}</p>
+        </div>
+        <ion-icon name="chevron-forward" color="medium"></ion-icon>
+      </div>
+      <div class="session-meta">
+        <span class="sync-status" [class.synced]="session.is_synced">
+          <ion-icon [name]="session.is_synced ? 'cloud-done' : 'cloud-offline'"></ion-icon>
+          {{ session.is_synced ? 'Sincronizado' : 'Local' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="sessions.length === 0">
+      <ion-icon name="calendar-outline" color="medium"></ion-icon>
+      <h3>Sin entrenamientos</h3>
+      <p>Todavía no registraste ninguna sesión</p>
+    </div>
+  </div>
+</ion-content>
