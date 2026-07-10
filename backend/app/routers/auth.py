@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from datetime import timedelta
+from urllib.parse import urlencode
 
 from app.database import get_db
 from app.models.user import User
@@ -80,13 +82,12 @@ def google_callback(code: str, db: Session = Depends(get_db)):
             db.commit()
 
         jwt_token = create_access_token(data={"sub": user.id})
-        return {
-            "access_token": jwt_token,
-            "token_type": "bearer",
-            "user": UserResponse.model_validate(user)
-        }
+
+        params = urlencode({"token": jwt_token})
+        return RedirectResponse(url=f"{settings.FRONTEND_URL}/auth/success?{params}")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Google auth failed: {str(e)}")
+        params = urlencode({"error": str(e)})
+        return RedirectResponse(url=f"{settings.FRONTEND_URL}/auth/error?{params}")
 
 
 @router.get("/me", response_model=UserResponse)

@@ -27,6 +27,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/history/history.page').then(m => m.HistoryPage)
   },
   {
+    path: 'auth/success',
+    loadComponent: () => import('./pages/auth-success/auth-success.page').then(m => m.AuthSuccessPage)
+  },
+  {
+    path: 'auth/error',
+    loadComponent: () => import('./pages/auth-error/auth-error.page').then(m => m.AuthErrorPage)
+  },
+  {
     path: '**',
     redirectTo: 'login'
   }
