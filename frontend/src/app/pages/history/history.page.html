@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
+      <ion-button (click)="irAtras()">
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -10,30 +10,24 @@
 </ion-header>
 
 <ion-content class="ion-padding" color="light">
-  <ion-loading [isOpen]="isLoading" message="Cargando historial..."></ion-loading>
+  <ion-loading [isOpen]="cargando" message="Cargando historial..."></ion-loading>
 
-  <div class="history-list" *ngIf="!isLoading">
+  <div class="history-list" *ngIf="!cargando">
     <div
-      *ngFor="let session of sessions"
+      *ngFor="let sesion of sesiones"
       class="session-card workout-card"
-      (click)="viewSession(session.id)">
+      (click)="verSesion(sesion.id)">
       <div class="session-header">
         <ion-icon name="barbell-outline" color="primary"></ion-icon>
         <div class="session-info">
-          <h3>{{ formatDate(session.date) }}</h3>
-          <p>{{ session.general_notes || 'Sin notas' }}</p>
+          <h3>{{ formatearFecha(sesion.fecha) }}</h3>
+          <p>{{ sesion.notas_generales || 'Sin notas' }}</p>
         </div>
-        <ion-icon name="chevron-forward" color="medium"></ion-icon>
-      </div>
-      <div class="session-meta">
-        <span class="sync-status" [class.synced]="session.is_synced">
-          <ion-icon [name]="session.is_synced ? 'cloud-done' : 'cloud-offline'"></ion-icon>
-          {{ session.is_synced ? 'Sincronizado' : 'Local' }}
-        </span>
+        <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
       </div>
     </div>
 
-    <div class="empty-state" *ngIf="sessions.length === 0">
+    <div class="empty-state" *ngIf="sesiones.length === 0">
       <ion-icon name="calendar-outline" color="medium"></ion-icon>
       <h3>Sin entrenamientos</h3>
       <p>Todavía no registraste ninguna sesión</p>

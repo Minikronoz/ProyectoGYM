@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://proyectogym-3nun.onrender.com'
+  supabaseUrl: 'YOUR_SUPABASE_URL',
+  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY'
 };

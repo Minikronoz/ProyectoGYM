@@ -2,7 +2,7 @@
   <ion-toolbar color="primary">
     <ion-title>FlexLog</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="logout()">
+      <ion-button (click)="cerrarSesion()">
         <ion-icon name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -11,26 +11,26 @@
 
 <ion-content class="ion-padding" color="light">
   <div class="greeting-section">
-    <h2>Hola, {{ userName }}</h2>
-    <p>Seleccioná tu gym para empezar</p>
+    <h2>Hola, {{ nombreUsuario }}</h2>
+    <p>Seleccioná tu gimnasio para empezar</p>
   </div>
 
-  <ion-loading [isOpen]="isLoading" message="Cargando..."></ion-loading>
+  <ion-loading [isOpen]="cargando" message="Cargando..."></ion-loading>
 
   <ion-list lines="none" class="gym-list">
     <ion-item
-      *ngFor="let gym of gyms"
-      [class.selected]="gym.id === selectedGymId"
-      (click)="selectGym(gym.id)"
+      *ngFor="let gimnasio of gimnasios"
+      [class.selected]="gimnasio.id === gimnasioSeleccionadoId"
+      (click)="seleccionarGimnasio(gimnasio.id)"
       class="gym-item"
       detail>
       <ion-icon name="business-outline" slot="start" color="primary"></ion-icon>
       <ion-label>
-        <h3>{{ gym.name }}</h3>
-        <p>{{ gym.branch }}</p>
+        <h3>{{ gimnasio.nombre }}</h3>
+        <p>{{ gimnasio.sucursal }}</p>
       </ion-label>
       <ion-icon
-        *ngIf="gym.id === selectedGymId"
+        *ngIf="gimnasio.id === gimnasioSeleccionadoId"
         name="checkmark-circle"
         slot="end"
         color="primary">
@@ -42,8 +42,8 @@
     <ion-button
       expand="block"
       size="large"
-      [disabled]="!selectedGymId"
-      (click)="startWorkout()"
+      [disabled]="!gimnasioSeleccionadoId"
+      (click)="comenzarEntrenamiento()"
       class="quick-action-btn">
       <ion-icon slot="start" name="barbell"></ion-icon>
       Iniciar Entrenamiento
@@ -53,7 +53,7 @@
       expand="block"
       size="large"
       fill="outline"
-      (click)="viewHistory()"
+      (click)="verHistorial()"
       class="quick-action-btn">
       <ion-icon slot="start" name="calendar-outline"></ion-icon>
       Ver Historial

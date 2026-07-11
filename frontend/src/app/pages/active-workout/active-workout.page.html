@@ -1,13 +1,13 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
+      <ion-button (click)="irAtras()">
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title>Entrenamiento</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="showFinishConfirm = true" [disabled]="totalSets === 0">
+      <ion-button (click)="mostrarConfirmarFinalizar = true" [disabled]="totalSeries === 0">
         <ion-icon name="checkmark-circle-outline"></ion-icon>
         Terminar
       </ion-button>
@@ -16,39 +16,39 @@
 </ion-header>
 
 <ion-content class="ion-padding" color="light">
-  <ion-loading [isOpen]="isSaving" message="Guardando..."></ion-loading>
+  <ion-loading [isOpen]="guardando" message="Guardando..."></ion-loading>
 
-  <div class="equipment-tabs" *ngIf="equipmentWithSets.length > 1">
+  <div class="equipment-tabs" *ngIf="equiposConSeries.length > 1">
     <div
-      *ngFor="let eq of equipmentWithSets; let i = index"
+      *ngFor="let eq of equiposConSeries; let i = index"
       class="equipment-tab"
-      [class.active]="i === currentEquipmentIndex"
-      [class.has-sets]="eq.sets.length > 0"
-      (click)="goToEquipment(i)">
-      <span class="tab-name">{{ eq.equipment.custom_alias }}</span>
-      <span class="tab-sets" *ngIf="eq.sets.length > 0">{{ eq.sets.length }}</span>
+      [class.active]="i === indiceEquipoActual"
+      [class.has-sets]="eq.series.length > 0"
+      (click)="irAEquipo(i)">
+      <span class="tab-name">{{ eq.equipo.alias_personalizado }}</span>
+      <span class="tab-sets" *ngIf="eq.series.length > 0">{{ eq.series.length }}</span>
     </div>
   </div>
 
-  <div class="workout-card" *ngIf="currentEquipment">
+  <div class="workout-card" *ngIf="equipoActual">
     <div class="card-header">
-      <h2>{{ currentEquipment.equipment.custom_alias }}</h2>
-      <p>{{ currentEquipment.equipment.exercise_name }} · {{ currentEquipment.equipment.unit_type }}</p>
+      <h2>{{ equipoActual.equipo.alias_personalizado }}</h2>
+      <p>{{ equipoActual.equipo.nombre_ejercicio }} · {{ equipoActual.equipo.tipo_unidad }}</p>
     </div>
 
-    <div class="last-set-info" *ngIf="currentEquipment.lastSet">
-      <span class="last-set-placeholder">{{ getLastSetDisplay() }}</span>
+    <div class="last-set-info" *ngIf="equipoActual.ultimaSerie">
+      <span class="last-set-placeholder">{{ obtenerDisplayUltimaSerie() }}</span>
     </div>
 
     <div class="sets-list">
       <div
-        *ngFor="let set of currentEquipment.sets"
+        *ngFor="let serie of equipoActual.series"
         class="set-item"
-        [class.failure]="set.is_to_failure">
-        <span class="set-number">{{ set.set_number }}</span>
-        <span class="set-details">{{ getSetDisplay(set) }}</span>
-        <ion-icon *ngIf="set.is_to_failure" name="flame" color="danger"></ion-icon>
-        <ion-icon *ngIf="set.set_notes" name="chatbubble-outline" color="medium"></ion-icon>
+        [class.failure]="serie.hasta_falla">
+        <span class="set-number">{{ serie.numero_serie }}</span>
+        <span class="set-details">{{ obtenerDisplaySerie(serie) }}</span>
+        <ion-icon *ngIf="serie.hasta_falla" name="flame" color="danger"></ion-icon>
+        <ion-icon *ngIf="serie.notas_serie" name="chatbubble-outline" color="medium"></ion-icon>
       </div>
     </div>
 
@@ -58,40 +58,36 @@
         <div class="quick-buttons">
           <ion-button
             size="small"
-            (click)="addSet(currentEquipmentIndex, currentEquipment.lastSet?.weight_value || 0, currentEquipment.lastSet?.reps_count || 8, false)">
+            (click)="agregarSerie(indiceEquipoActual, equipoActual.ultimaSerie?.valor_peso || 0, equipoActual.ultimaSerie?.cantidad_reps || 8, false)">
             + Reps
           </ion-button>
           <ion-button
             size="small"
             color="danger"
-            (click)="addSet(currentEquipmentIndex, currentEquipment.lastSet?.weight_value || 0, currentEquipment.lastSet?.reps_count || 8, true)">
+            (click)="agregarSerie(indiceEquipoActual, equipoActual.ultimaSerie?.valor_peso || 0, equipoActual.ultimaSerie?.cantidad_reps || 8, true)">
             Fallar
           </ion-button>
         </div>
       </div>
     </div>
 
-    <div class="quick-navigation" *ngIf="equipmentWithSets.length > 1">
-      <ion-button fill="outline" (click)="goPrevious()" [disabled]="currentEquipmentIndex === 0">
-        <ion-icon slot="start" name="chevron-back"></ion-icon>
+    <div class="quick-navigation" *ngIf="equiposConSeries.length > 1">
+      <ion-button fill="outline" (click)="irAnterior()" [disabled]="indiceEquipoActual === 0">
+        <ion-icon slot="start" name="arrow-back"></ion-icon>
         Anterior
       </ion-button>
-      <span class="equipment-counter">{{ currentEquipmentIndex + 1 }} / {{ equipmentWithSets.length }}</span>
-      <ion-button fill="outline" (click)="goNext()" [disabled]="currentEquipmentIndex === equipmentWithSets.length - 1">
+      <span class="equipment-counter">{{ indiceEquipoActual + 1 }} / {{ equiposConSeries.length }}</span>
+      <ion-button fill="outline" (click)="irSiguiente()" [disabled]="indiceEquipoActual === equiposConSeries.length - 1">
         Siguiente
-        <ion-icon slot="end" name="chevron-forward"></ion-icon>
+        <ion-icon slot="end" name="arrow-forward"></ion-icon>
       </ion-button>
     </div>
   </div>
 
   <ion-alert
-    [isOpen]="showFinishConfirm"
+    [isOpen]="mostrarConfirmarFinalizar"
     header="Terminar Entrenamiento"
-    [message]="'Registraste ' + totalSets + ' series. ¿Querés guardar?'"
-    [buttons]="[
-      { text: 'Cancelar', role: 'cancel', handler: cancelFinish },
-      { text: 'Descartar', role: 'destructive', handler: discardAndExit },
-      { text: 'Guardar', handler: finishWorkout }
-    ]">
+    [message]="'Registraste ' + totalSeries + ' series. ¿Querés guardar?'"
+    [buttons]="cancelarBotones">
   </ion-alert>
 </ion-content>

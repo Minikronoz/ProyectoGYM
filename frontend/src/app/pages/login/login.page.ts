@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ApiService } from '../../services/api.service';
+import { ServicioSupabase } from '../../services/supabase.service';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonList, IonItem, IonLabel } from '@ionic/angular/standalone';
 
 @Component({
@@ -10,9 +10,9 @@ import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonLis
   imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonList, IonItem, IonLabel]
 })
 export class LoginPage {
-  constructor(private api: ApiService) {}
+  constructor(private supabase: ServicioSupabase) {}
 
-  async loginWithGoogle(): Promise<void> {
-    await this.api.loginWithGoogle();
+  async iniciarSesionConGoogle(): Promise<void> {
+    await this.supabase.iniciarSesionConGoogle();
   }
 }

@@ -1,33 +1,32 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
+      <ion-button (click)="irAtras()">
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Día de Entrenamiento</ion-title>
+    <ion-title>Entrenamiento de Hoy</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="verHistorial()">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding" color="light">
-  <ion-loading [isOpen]="isLoading" message="Cargando..."></ion-loading>
+  <ion-loading [isOpen]="cargando" message="Cargando..."></ion-loading>
 
-  <div class="date-section">
-    <ion-item lines="none" class="date-item">
-      <ion-icon name="calendar-outline" slot="start" color="primary"></ion-icon>
-      <ion-datetime
-        [(ngModel)]="workoutDate"
-        presentation="date"
-        [preferWheel]="true">
-      </ion-datetime>
-    </ion-item>
+  <div class="today-section">
+    <h2>{{ obtenerFechaHoy() }}</h2>
+    <p class="subtitle">¿Qué máquinas vas a usar hoy?</p>
   </div>
 
   <div class="notes-section">
     <ion-item lines="none" class="notes-item">
       <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
       <ion-input
-        [(ngModel)]="workoutNotes"
+        [(ngModel)]="notasEntrenamiento"
         placeholder="Notas del entrenamiento (opcional)"
         clearInput>
       </ion-input>
@@ -35,23 +34,28 @@
   </div>
 
   <div class="equipment-section">
-    <h3>Seleccioná las máquinas</h3>
-    <p class="section-hint">Elegí las máquinas que vas a usar hoy</p>
+    <h3> Máquinas disponibles</h3>
 
-    <ion-list lines="none" class="equipment-list">
+    <div class="empty-state" *ngIf="equipos.length === 0 && !cargando">
+      <ion-icon name="barbell-outline" color="medium" size="large"></ion-icon>
+      <h4>No hay máquinas configuradas</h4>
+      <p>Este gimnasio aún no tiene máquinas registradas.</p>
+    </div>
+
+    <ion-list lines="none" class="equipment-list" *ngIf="equipos.length > 0">
       <ion-item
-        *ngFor="let eq of equipment"
-        [class.selected]="isSelected(eq.id)"
-        (click)="toggleEquipment(eq.id)"
+        *ngFor="let eq of equipos"
+        [class.selected]="estaSeleccionado(eq.id)"
+        (click)="toggleEquipo(eq.id)"
         class="equipment-item"
         detail>
         <ion-icon name="barbell-outline" slot="start" color="primary"></ion-icon>
         <ion-label>
-          <h3>{{ eq.custom_alias }}</h3>
-          <p>{{ eq.exercise_name }} · {{ eq.unit_type }}</p>
+          <h3>{{ eq.alias_personalizado }}</h3>
+          <p>{{ eq.nombre_ejercicio }} · {{ eq.tipo_unidad }}</p>
         </ion-label>
         <ion-checkbox
-          [checked]="isSelected(eq.id)"
+          [checked]="estaSeleccionado(eq.id)"
           slot="end"
           color="primary">
         </ion-checkbox>
@@ -59,20 +63,18 @@
     </ion-list>
   </div>
 
-  <div class="recent-section" *ngIf="recentSessions.length > 0">
-    <h3>Sesiones Anteriores</h3>
-    <p class="section-hint">O continuá desde una sesión anterior</p>
-
+  <div class="recent-section" *ngIf="sesionesRecientes.length > 0">
+    <h3>Sesiones Recientes</h3>
     <ion-list lines="none" class="recent-list">
       <ion-item
-        *ngFor="let session of recentSessions"
-        (click)="continuePreviousSession(session.id)"
+        *ngFor="let sesion of sesionesRecientes"
+        (click)="continuarSesionAnterior(sesion.id)"
         class="recent-item"
         detail>
         <ion-icon name="time-outline" slot="start" color="medium"></ion-icon>
         <ion-label>
-          <h3>{{ session.date }}</h3>
-          <p>{{ session.general_notes || 'Sin notas' }}</p>
+          <h3>{{ formatearFecha(sesion.fecha) }}</h3>
+          <p>{{ sesion.notas_generales || 'Sin notas' }} · {{ sesion.series?.length || 0 }} series</p>
         </ion-label>
       </ion-item>
     </ion-list>
@@ -82,11 +84,11 @@
     <ion-button
       expand="block"
       size="large"
-      [disabled]="selectedEquipmentIds.length === 0"
-      (click)="startWorkout()"
+      [disabled]="equiposSeleccionadosIds.length === 0"
+      (click)="comenzarEntrenamiento()"
       class="quick-action-btn">
       <ion-icon slot="start" name="play"></ion-icon>
-      Empezar ({{ selectedEquipmentIds.length }} máquinas)
+      Empezar{{ equiposSeleccionadosIds.length > 0 ? ' (' + equiposSeleccionadosIds.length + ' máquinas)' : '' }}
     </ion-button>
   </div>
 </ion-content>

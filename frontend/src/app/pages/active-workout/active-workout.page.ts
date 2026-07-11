@@ -1,19 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApiService } from '../../services/api.service';
-import { SyncService } from '../../services/sync.service';
-import { GymEquipment, ExerciseSet, WorkoutSession, SetType } from '../../models/models';
+import { ServicioSupabase, EquipoGimnasio, SerieEjercicio, SesionEntrenamiento } from '../../services/supabase.service';
 import { CommonModule } from '@angular/common';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon,
   IonLoading, IonButtons, IonAlert, IonLabel
 } from '@ionic/angular/standalone';
 
-interface EquipmentWithSets {
-  equipment: GymEquipment;
-  sets: ExerciseSet[];
-  currentSetNumber: number;
-  lastSet: ExerciseSet | null;
+interface EquipoConSeries {
+  equipo: EquipoGimnasio;
+  series: SerieEjercicio[];
+  numeroSerieActual: number;
+  ultimaSerie: SerieEjercicio | null;
 }
 
 @Component({
@@ -27,145 +25,168 @@ interface EquipmentWithSets {
     IonLoading, IonButtons, IonAlert, IonLabel
   ]
 })
-export class ActiveWorkoutPage implements OnInit {
-  gymId!: number;
-  equipmentIds: number[] = [];
-  session!: WorkoutSession;
-  equipmentWithSets: EquipmentWithSets[] = [];
-  currentEquipmentIndex = 0;
-  isSaving = false;
-  showFinishConfirm = false;
+export class EntrenamientoActivoPage implements OnInit {
+  gimnasioId!: number;
+  equiposIds: number[] = [];
+  sesion!: SesionEntrenamiento;
+  equiposConSeries: EquipoConSeries[] = [];
+  indiceEquipoActual = 0;
+  guardando = false;
+  mostrarConfirmarFinalizar = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private api: ApiService,
-    private syncService: SyncService
+    private supabase: ServicioSupabase
   ) {}
 
   async ngOnInit(): Promise<void> {
-    this.gymId = Number(this.route.snapshot.queryParams['gymId']);
-    const equipmentIdsStr = this.route.snapshot.queryParams['equipmentIds'];
-    const sessionDataStr = this.route.snapshot.queryParams['sessionData'];
+    this.gimnasioId = Number(this.route.snapshot.queryParams['gimnasioId']);
+    const equiposIdsStr = this.route.snapshot.queryParams['equiposIds'];
+    const datosSesionStr = this.route.snapshot.queryParams['datosSesion'];
 
-    this.equipmentIds = equipmentIdsStr.split(',').map(Number);
-    this.session = JSON.parse(sessionDataStr);
+    this.equiposIds = equiposIdsStr.split(',').map(Number);
+    this.sesion = JSON.parse(datosSesionStr);
 
-    await this.loadEquipmentWithLastSets();
+    await this.cargarEquiposConUltimasSeries();
   }
 
-  async loadEquipmentWithLastSets(): Promise<void> {
-    const equipment = await this.api.getEquipment(this.gymId);
-    const selectedEquipment = equipment.filter(eq => this.equipmentIds.includes(eq.id));
+  async cargarEquiposConUltimasSeries(): Promise<void> {
+    const equipos = await this.supabase.obtenerEquipos(this.gimnasioId);
+    const equiposSeleccionados = equipos.filter(eq => this.equiposIds.includes(eq.id));
 
-    this.equipmentWithSets = [];
+    this.equiposConSeries = [];
 
-    for (const eq of selectedEquipment) {
-      const lastSet = await this.api.getLastSetForEquipment(eq.id);
-      this.equipmentWithSets.push({
-        equipment: eq,
-        sets: [],
-        currentSetNumber: 1,
-        lastSet: lastSet
+    for (const eq of equiposSeleccionados) {
+      const ultimaSerie = await this.supabase.obtenerUltimaSerieParaEquipo(eq.id);
+      this.equiposConSeries.push({
+        equipo: eq,
+        series: [],
+        numeroSerieActual: 1,
+        ultimaSerie: ultimaSerie
       });
     }
   }
 
-  get currentEquipment(): EquipmentWithSets | null {
-    return this.equipmentWithSets[this.currentEquipmentIndex] || null;
+  get equipoActual(): EquipoConSeries | null {
+    return this.equiposConSeries[this.indiceEquipoActual] || null;
   }
 
-  get totalSets(): number {
-    return this.equipmentWithSets.reduce((acc, eq) => acc + eq.sets.length, 0);
+  get totalSeries(): number {
+    return this.equiposConSeries.reduce((acc, eq) => acc + eq.series.length, 0);
   }
 
-  addSet(equipmentIndex: number, weight: number, reps: number, isFailure: boolean = false, notes: string = ''): void {
-    const eq = this.equipmentWithSets[equipmentIndex];
-    const newSet: ExerciseSet = {
+  agregarSerie(indiceEquipo: number, peso: number, reps: number, esFalla: boolean = false, notas: string = ''): void {
+    const eq = this.equiposConSeries[indiceEquipo];
+    const nuevaSerie: SerieEjercicio = {
       id: 0,
-      workout_session_id: 0,
-      gym_equipment_id: eq.equipment.id,
-      set_number: eq.currentSetNumber,
-      set_type: isFailure ? SetType.FAILURE : SetType.NORMAL,
-      weight_value: weight,
-      reps_count: reps,
-      is_to_failure: isFailure,
-      set_notes: notes,
-      equipment_alias: eq.equipment.custom_alias,
-      exercise_name: eq.equipment.exercise_name
+      sesion_entrenamiento_id: 0,
+      equipo_gimnasio_id: eq.equipo.id,
+      numero_serie: eq.numeroSerieActual,
+      tipo_serie: esFalla ? 'falla' : 'normal',
+      valor_peso: peso,
+      cantidad_reps: reps,
+      hasta_falla: esFalla,
+      notas_serie: notas,
+      id_cliente: crypto.randomUUID(),
+      creado_en: new Date().toISOString()
     };
 
-    eq.sets.push(newSet);
-    eq.currentSetNumber++;
+    eq.series.push(nuevaSerie);
+    eq.numeroSerieActual++;
   }
 
-  goToEquipment(index: number): void {
-    this.currentEquipmentIndex = index;
+  irAEquipo(indice: number): void {
+    this.indiceEquipoActual = indice;
   }
 
-  goNext(): void {
-    if (this.currentEquipmentIndex < this.equipmentWithSets.length - 1) {
-      this.currentEquipmentIndex++;
+  irSiguiente(): void {
+    if (this.indiceEquipoActual < this.equiposConSeries.length - 1) {
+      this.indiceEquipoActual++;
     }
   }
 
-  goPrevious(): void {
-    if (this.currentEquipmentIndex > 0) {
-      this.currentEquipmentIndex--;
+  irAnterior(): void {
+    if (this.indiceEquipoActual > 0) {
+      this.indiceEquipoActual--;
     }
   }
 
-  getSetDisplay(set: ExerciseSet): string {
-    const unit = set.unit_type || this.currentEquipment?.equipment.unit_type || 'kg';
-    return `${set.weight_value}${unit} × ${set.reps_count}`;
+  obtenerDisplaySerie(set: SerieEjercicio): string {
+    const unidad = set.tipo_unidad || this.equipoActual?.equipo.tipo_unidad || 'kg';
+    return `${set.valor_peso}${unidad} × ${set.cantidad_reps}`;
   }
 
-  getLastSetDisplay(): string {
-    const last = this.currentEquipment?.lastSet;
-    if (!last) return '';
-    const unit = last.unit_type || this.currentEquipment?.equipment.unit_type || 'kg';
-    return `Última: ${last.weight_value}${unit} × ${last.reps_count}`;
+  obtenerDisplayUltimaSerie(): string {
+    const ultima = this.equipoActual?.ultimaSerie;
+    if (!ultima) return '';
+    const unidad = ultima.tipo_unidad || this.equipoActual?.equipo.tipo_unidad || 'kg';
+    return `Última: ${ultima.valor_peso}${unidad} × ${ultima.cantidad_reps}`;
   }
 
-  async finishWorkout(): Promise<void> {
-    this.isSaving = true;
-    this.showFinishConfirm = false;
+  async finalizarEntrenamiento(): Promise<void> {
+    this.guardando = true;
+    this.mostrarConfirmarFinalizar = false;
 
     try {
-      const session = {
-        ...this.session,
-        sets: this.equipmentWithSets.flatMap(eq => eq.sets)
-      };
+      const sesionCreada = await this.supabase.crearSesion({
+        usuario_id: this.supabase.usuario?.id || '',
+        gimnasio_id: this.gimnasioId,
+        fecha: this.sesion.fecha,
+        notas_generales: this.sesion.notas_generales,
+        id_cliente: this.sesion.id_cliente
+      });
 
-      await this.syncService.addLocalSession(session);
+      for (const eq of this.equiposConSeries) {
+        for (const serie of eq.series) {
+          await this.supabase.crearSerie({
+            sesion_entrenamiento_id: sesionCreada.id,
+            equipo_gimnasio_id: serie.equipo_gimnasio_id,
+            numero_serie: serie.numero_serie,
+            tipo_serie: serie.tipo_serie,
+            valor_peso: serie.valor_peso,
+            cantidad_reps: serie.cantidad_reps,
+            hasta_falla: serie.hasta_falla,
+            notas_serie: serie.notas_serie,
+            id_cliente: serie.id_cliente
+          });
+        }
+      }
 
-      const syncResult = await this.syncService.syncAll();
       this.router.navigate(['/gym-selector']);
     } catch (error) {
-      console.error('Error saving workout:', error);
+      console.error('Error al guardar entrenamiento:', error);
       this.router.navigate(['/gym-selector']);
     } finally {
-      this.isSaving = false;
+      this.guardando = false;
     }
   }
 
-  goBack(): void {
-    if (this.totalSets > 0) {
-      this.showFinishConfirm = true;
+  irAtras(): void {
+    if (this.totalSeries > 0) {
+      this.mostrarConfirmarFinalizar = true;
     } else {
       this.router.navigate(['/workout-day'], {
-        queryParams: { gymId: this.gymId }
+        queryParams: { gimnasioId: this.gimnasioId }
       });
     }
   }
 
-  cancelFinish(): void {
-    this.showFinishConfirm = false;
+  get cancelarBotones() {
+    return [
+      { text: 'Cancelar', role: 'cancel', handler: () => this.mostrarConfirmarFinalizar = false },
+      { text: 'Descartar', role: 'destructive', handler: () => this.router.navigate(['/workout-day'], { queryParams: { gimnasioId: this.gimnasioId } }) },
+      { text: 'Guardar', handler: () => this.finalizarEntrenamiento() }
+    ];
   }
 
-  discardAndExit(): void {
+  cancelarFinalizar(): void {
+    this.mostrarConfirmarFinalizar = false;
+  }
+
+  descartarYSalir(): void {
     this.router.navigate(['/workout-day'], {
-      queryParams: { gymId: this.gymId }
+      queryParams: { gimnasioId: this.gimnasioId }
     });
   }
 }

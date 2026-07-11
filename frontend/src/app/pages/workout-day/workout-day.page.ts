@@ -1,14 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApiService } from '../../services/api.service';
-import { GymEquipment, WorkoutSession } from '../../models/models';
-import { v4 as uuidv4 } from 'uuid';
+import { ServicioSupabase, EquipoGimnasio, SesionEntrenamiento } from '../../services/supabase.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon,
   IonList, IonItem, IonLabel, IonLoading, IonButtons, IonBackButton,
-  IonDatetime, IonInput, IonCheckbox
+  IonInput, IonCheckbox
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -21,96 +19,116 @@ import {
     FormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon,
     IonList, IonItem, IonLabel, IonLoading, IonButtons, IonBackButton,
-    IonDatetime, IonInput, IonCheckbox
+    IonInput, IonCheckbox
   ]
 })
-export class WorkoutDayPage implements OnInit {
-  gymId!: number;
-  equipment: GymEquipment[] = [];
-  recentSessions: WorkoutSession[] = [];
-  selectedEquipmentIds: number[] = [];
-  workoutDate: string = new Date().toISOString().split('T')[0];
-  workoutNotes: string = '';
-  isLoading = true;
-  session: WorkoutSession | null = null;
+export class DiaEntrenamientoPage implements OnInit {
+  gimnasioId!: number;
+  equipos: EquipoGimnasio[] = [];
+  sesionesRecientes: SesionEntrenamiento[] = [];
+  equiposSeleccionadosIds: number[] = [];
+  fechaEntrenamiento: string = new Date().toISOString();
+  notasEntrenamiento: string = '';
+  cargando = true;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private api: ApiService
+    private supabase: ServicioSupabase
   ) {}
 
   async ngOnInit(): Promise<void> {
-    this.gymId = Number(this.route.snapshot.queryParams['gymId']);
-    await this.loadData();
+    this.gimnasioId = Number(this.route.snapshot.queryParams['gimnasioId']);
+    await this.cargarDatos();
   }
 
-  async loadData(): Promise<void> {
+  async cargarDatos(): Promise<void> {
     try {
-      this.equipment = await this.api.getEquipment(this.gymId);
-      this.recentSessions = await this.api.getSessions(this.gymId);
-      this.recentSessions = this.recentSessions.slice(0, 5);
+      this.equipos = await this.supabase.obtenerEquipos(this.gimnasioId);
+      this.sesionesRecientes = await this.supabase.obtenerSesiones(this.gimnasioId);
+      this.sesionesRecientes = this.sesionesRecientes.slice(0, 5);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error al cargar datos:', error);
     } finally {
-      this.isLoading = false;
+      this.cargando = false;
     }
   }
 
-  toggleEquipment(equipmentId: number): void {
-    const index = this.selectedEquipmentIds.indexOf(equipmentId);
+  toggleEquipo(equipoId: number): void {
+    const index = this.equiposSeleccionadosIds.indexOf(equipoId);
     if (index > -1) {
-      this.selectedEquipmentIds.splice(index, 1);
+      this.equiposSeleccionadosIds.splice(index, 1);
     } else {
-      this.selectedEquipmentIds.push(equipmentId);
+      this.equiposSeleccionadosIds.push(equipoId);
     }
   }
 
-  isSelected(equipmentId: number): boolean {
-    return this.selectedEquipmentIds.includes(equipmentId);
+  estaSeleccionado(equipoId: number): boolean {
+    return this.equiposSeleccionadosIds.includes(equipoId);
   }
 
-  async startWorkout(): Promise<void> {
-    if (this.selectedEquipmentIds.length === 0) return;
+  obtenerFechaHoy(): string {
+    const hoy = new Date();
+    return hoy.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
+    });
+  }
 
-    this.session = {
+  formatearFecha(fechaStr: string): string {
+    const fecha = new Date(fechaStr);
+    return fecha.toLocaleDateString('es-ES', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short'
+    });
+  }
+
+  async comenzarEntrenamiento(): Promise<void> {
+    if (this.equiposSeleccionadosIds.length === 0) return;
+
+    const sesion = {
       id: 0,
-      user_id: 0,
-      gym_id: this.gymId,
-      date: this.workoutDate,
-      general_notes: this.workoutNotes,
-      is_synced: false,
-      client_id: uuidv4(),
-      created_at: new Date().toISOString(),
-      sets: []
+      usuario_id: '',
+      gimnasio_id: this.gimnasioId,
+      fecha: new Date().toISOString().split('T')[0],
+      notas_generales: this.notasEntrenamiento,
+      id_cliente: crypto.randomUUID(),
+      creado_en: new Date().toISOString(),
+      actualizado_en: new Date().toISOString(),
+      series: []
     };
 
     this.router.navigate(['/active-workout'], {
       queryParams: {
-        gymId: this.gymId,
-        equipmentIds: this.selectedEquipmentIds.join(','),
-        sessionData: JSON.stringify(this.session)
+        gimnasioId: this.gimnasioId,
+        equiposIds: this.equiposSeleccionadosIds.join(','),
+        datosSesion: JSON.stringify(sesion)
       }
     });
   }
 
-  async continuePreviousSession(sessionId: number): Promise<void> {
-    const fullSession = await this.api.getSession(sessionId);
-    fullSession.client_id = uuidv4();
-    fullSession.date = new Date().toISOString().split('T')[0];
-    fullSession.is_synced = false;
-    fullSession.sets = [];
+  async continuarSesionAnterior(sesionId: number): Promise<void> {
+    const sesionCompleta = await this.supabase.obtenerSesion(sesionId);
+    if (sesionCompleta && sesionCompleta.series) {
+      const equiposIds = [...new Set(sesionCompleta.series.map((s: any) => s.equipo_gimnasio_id))];
 
-    this.router.navigate(['/active-workout'], {
-      queryParams: {
-        gymId: this.gymId,
-        equipmentIds: fullSession.sets?.map(s => s.gym_equipment_id).join(',') || '',
-        sessionData: JSON.stringify(fullSession)
-      }
-    });
+      this.router.navigate(['/active-workout'], {
+        queryParams: {
+          gimnasioId: this.gimnasioId,
+          equiposIds: equiposIds.join(','),
+          datosSesion: JSON.stringify(sesionCompleta)
+        }
+      });
+    }
   }
 
-  goBack(): void {
+  verHistorial(): void {
+    this.router.navigate(['/history']);
+  }
+
+  irAtras(): void {
     this.router.navigate(['/gym-selector']);
   }
 }

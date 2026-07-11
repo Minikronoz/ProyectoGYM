@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ApiService } from '../../services/api.service';
-import { WorkoutSession } from '../../models/models';
+import { ServicioSupabase, SesionEntrenamiento } from '../../services/supabase.service';
+import { CommonModule } from '@angular/common';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon,
-  IonLoading, IonButtons, IonBackButton
+  IonList, IonItem, IonLabel, IonLoading, IonButtons, IonBackButton
 } from '@ionic/angular/standalone';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-history',
@@ -16,47 +15,47 @@ import { CommonModule } from '@angular/common';
   imports: [
     CommonModule,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon,
-    IonLoading, IonButtons, IonBackButton
+    IonList, IonItem, IonLabel, IonLoading, IonButtons, IonBackButton
   ]
 })
-export class HistoryPage implements OnInit {
-  sessions: WorkoutSession[] = [];
-  isLoading = true;
+export class HistorialPage implements OnInit {
+  sesiones: SesionEntrenamiento[] = [];
+  cargando = true;
 
   constructor(
-    private api: ApiService,
+    private supabase: ServicioSupabase,
     private router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
-    await this.loadSessions();
+    await this.cargarSesiones();
   }
 
-  async loadSessions(): Promise<void> {
+  async cargarSesiones(): Promise<void> {
     try {
-      this.sessions = await this.api.getSessions();
+      this.sesiones = await this.supabase.obtenerSesiones();
     } catch (error) {
-      console.error('Error loading sessions:', error);
+      console.error('Error al cargar sesiones:', error);
     } finally {
-      this.isLoading = false;
+      this.cargando = false;
     }
   }
 
-  viewSession(sessionId: number): void {
-    console.log('View session:', sessionId);
+  verSesion(sesionId: number): void {
+    console.log('Ver sesión:', sesionId);
   }
 
-  goBack(): void {
+  irAtras(): void {
     this.router.navigate(['/gym-selector']);
   }
 
-  getSessionIcon(): string {
+  obtenerIconoSesion(): string {
     return 'barbell-outline';
   }
 
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('es-ES', {
+  formatearFecha(fechaStr: string): string {
+    const fecha = new Date(fechaStr);
+    return fecha.toLocaleDateString('es-ES', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',

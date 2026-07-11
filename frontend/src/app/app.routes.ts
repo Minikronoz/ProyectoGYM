@@ -11,28 +11,24 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/login/login.page').then(m => m.LoginPage)
   },
   {
+    path: 'auth/callback',
+    loadComponent: () => import('./pages/auth-callback/auth-callback.page').then(m => m.AuthCallbackPage)
+  },
+  {
     path: 'gym-selector',
-    loadComponent: () => import('./pages/gym-selector/gym-selector.page').then(m => m.GymSelectorPage)
+    loadComponent: () => import('./pages/gym-selector/gym-selector.page').then(m => m.GimnasioSelectorPage)
   },
   {
     path: 'workout-day',
-    loadComponent: () => import('./pages/workout-day/workout-day.page').then(m => m.WorkoutDayPage)
+    loadComponent: () => import('./pages/workout-day/workout-day.page').then(m => m.DiaEntrenamientoPage)
   },
   {
     path: 'active-workout',
-    loadComponent: () => import('./pages/active-workout/active-workout.page').then(m => m.ActiveWorkoutPage)
+    loadComponent: () => import('./pages/active-workout/active-workout.page').then(m => m.EntrenamientoActivoPage)
   },
   {
     path: 'history',
-    loadComponent: () => import('./pages/history/history.page').then(m => m.HistoryPage)
-  },
-  {
-    path: 'auth/success',
-    loadComponent: () => import('./pages/auth-success/auth-success.page').then(m => m.AuthSuccessPage)
-  },
-  {
-    path: 'auth/error',
-    loadComponent: () => import('./pages/auth-error/auth-error.page').then(m => m.AuthErrorPage)
+    loadComponent: () => import('./pages/history/history.page').then(m => m.HistorialPage)
   },
   {
     path: '**',

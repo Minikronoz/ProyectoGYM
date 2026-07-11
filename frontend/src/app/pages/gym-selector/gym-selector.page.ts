@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ApiService } from '../../services/api.service';
-import { Gym } from '../../models/models';
+import { ServicioSupabase } from '../../services/supabase.service';
+import { Gimnasio } from '../../services/supabase.service';
 import { CommonModule } from '@angular/common';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon,
@@ -19,61 +19,61 @@ import {
     IonList, IonItem, IonLabel, IonLoading, IonButtons
   ]
 })
-export class GymSelectorPage implements OnInit {
-  gyms: Gym[] = [];
-  selectedGymId: number | null = null;
-  userName: string = '';
-  isLoading = true;
+export class GimnasioSelectorPage implements OnInit {
+  gimnasios: Gimnasio[] = [];
+  gimnasioSeleccionadoId: number | null = null;
+  nombreUsuario: string = '';
+  cargando = true;
 
   constructor(
-    private api: ApiService,
+    private supabase: ServicioSupabase,
     private router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
-    await this.loadGyms();
-    const user = await this.api.getCurrentUser();
-    if (user) {
-      this.userName = user.name || user.email;
+    await this.cargarGimnasios();
+    const usuario = this.supabase.usuario;
+    if (usuario) {
+      this.nombreUsuario = usuario.nombre_completo || usuario.email;
     }
   }
 
-  async loadGyms(): Promise<void> {
+  async cargarGimnasios(): Promise<void> {
     try {
-      this.gyms = await this.api.getGyms();
-      if (this.gyms.length === 0) {
-        const defaultGym = await this.api.createGym({
-          name: 'Smart Fit',
-          branch: 'Prat',
-          address: 'Prat, Chile'
+      this.gimnasios = await this.supabase.obtenerGimnasios();
+      if (this.gimnasios.length === 0) {
+        const gimnasioPredeterminado = await this.supabase.crearGimnasio({
+          nombre: 'Smart Fit',
+          sucursal: 'Prat',
+          direccion: 'Prat, Chile'
         });
-        this.gyms = [defaultGym];
+        this.gimnasios = [gimnasioPredeterminado];
       }
     } catch (error) {
-      console.error('Error loading gyms:', error);
+      console.error('Error al cargar gimnasios:', error);
     } finally {
-      this.isLoading = false;
+      this.cargando = false;
     }
   }
 
-  selectGym(gymId: number): void {
-    this.selectedGymId = gymId;
+  seleccionarGimnasio(gimnasioId: number): void {
+    this.gimnasioSeleccionadoId = gimnasioId;
   }
 
-  startWorkout(): void {
-    if (this.selectedGymId) {
+  comenzarEntrenamiento(): void {
+    if (this.gimnasioSeleccionadoId) {
       this.router.navigate(['/workout-day'], {
-        queryParams: { gymId: this.selectedGymId }
+        queryParams: { gimnasioId: this.gimnasioSeleccionadoId }
       });
     }
   }
 
-  viewHistory(): void {
+  verHistorial(): void {
     this.router.navigate(['/history']);
   }
 
-  async logout(): Promise<void> {
-    await this.api.logout();
+  async cerrarSesion(): Promise<void> {
+    await this.supabase.cerrarSesion();
     this.router.navigate(['/login']);
   }
 }
